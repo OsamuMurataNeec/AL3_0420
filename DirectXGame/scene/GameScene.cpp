@@ -1,10 +1,18 @@
 #include "GameScene.h"
 #include "TextureManager.h"
+#include "myMath.h"
 #include <cassert>
 
 GameScene::GameScene() {}
 
-GameScene::~GameScene() { delete model_; }
+GameScene::~GameScene() {
+	delete model_;
+
+	for (WorldTransform* worldTransformBlock : worldTransformBlocks_) {
+		delete worldTransformBlock;
+	}
+	worldTransformBlocks_.clear();
+}
 
 void GameScene::Initialize() {
 
@@ -13,9 +21,10 @@ void GameScene::Initialize() {
 	audio_ = Audio::GetInstance();
 
 	// ファイル名を指定してテクスチャを読み込む
-	textureHandle_ = TextureManager::Load("mario.jpg");
+	textureHandle_ = TextureManager::Load("block.jpg");
 	// 3Dモデルの生成
 	model_ = Model::Create();
+	modelBlock_ = Model::Create();
 	// ワールドトランスフォームの初期化
 	worldTransform_.Initialize();
 	// ビュープロジェクションの初期化
@@ -25,12 +34,45 @@ void GameScene::Initialize() {
 	player_ = new Player();
 	// 自キャラの初期化
 	player_->Initialize(model_, textureHandle_, &viewProjection_);
+
+
+// 要素数
+	const uint32_t kNumBlockHorizontal = 20;
+	// ブロック1個分の横幅
+	const float kBlockWidth = 2.0f;
+	// 要素数を変更する
+	worldTransformBlocks_.resize(kNumBlockHorizontal);
+
+	// キューブの生成
+	for (uint32_t i = 0; i < kNumBlockHorizontal; ++i) {
+
+		worldTransformBlocks_[i] = new WorldTransform();
+		worldTransformBlocks_[i]->Initialize();
+		worldTransformBlocks_[i]->translation_.x = kBlockWidth * i;
+		worldTransformBlocks_[i]->translation_.y = 0.0f;
+	}
 }
 
 void GameScene::Update() {
 	// 自キャラの更新
 	player_->Update();
+
+	
+// ブロックの更新
+	for (WorldTransform* worldTransformBlock : worldTransformBlocks_) {
+
+		// アフィン変換行列の作成
+		//(MakeAffineMatrix：自分で作った数学系関数)
+		worldTransformBlock->matWorld_ = 
+			MakeAffineMatrix(worldTransformBlock->scale_,
+						     worldTransformBlock->rotation_,
+						     worldTransformBlock->translation_);
+
+		// 定数バッファに転送
+		worldTransformBlock->TransferMatrix();
+	}
 }
+
 
 void GameScene::Draw() {
 
@@ -62,7 +104,15 @@ void GameScene::Draw() {
 //	model_->Draw(worldTransform_, viewProjection_, textureHandle_);
 
 	// 自キャラの描画
-	player_->Draw();
+//	player_->Draw();
+
+	// ブロックの描画
+	for (WorldTransform* worldTransformBlock : worldTransformBlocks_) {
+		modelBlock_->Draw(*worldTransformBlock, viewProjection_);
+	}
+
+
+
 
 	// 3Dオブジェクト描画後処理
 	Model::PostDraw();
