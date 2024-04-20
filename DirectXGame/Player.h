@@ -10,7 +10,7 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize();
+	void Initialize(Model* model, uint32_t textureHandle, ViewProjection* viewProjection);
 
 	/// <summary>
 	/// 更新
@@ -29,5 +29,8 @@ private:
 	Model* model_ = nullptr;
 	// テクスチャハンドル
 	uint32_t textureHandle_ = 0u;
+
+	ViewProjection* viewProjection_ = nullptr;
+
 };
 
