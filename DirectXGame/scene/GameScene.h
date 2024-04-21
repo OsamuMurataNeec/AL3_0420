@@ -65,5 +65,6 @@ private: // メンバ変数
 	// 自キャラ
 	Player* player_ = nullptr;
 
-	std::vector<WorldTransform*> worldTransformBlocks_;
+//	std::vector<WorldTransform*> worldTransformBlocks_;
+	std::vector<std::vector<WorldTransform*>> worldTransformBlocks_;
 };
