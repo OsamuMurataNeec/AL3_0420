@@ -10,9 +10,8 @@
 #include "Player.h"
 #include "DebugCamera.h"
 #include "Skydome.h"
-
+#include "MapChipField.h"
 #include <vector>
-
 
 
 /// <summary>
@@ -45,6 +44,8 @@ public: // メンバ関数
 	/// 描画
 	/// </summary>
 	void Draw();
+
+	void GenerateBlocks();
 
 private: // メンバ変数
 	DirectXCommon* dxCommon_ = nullptr;
@@ -79,4 +80,7 @@ private: // メンバ変数
 	Skydome* skydome_ = nullptr;
 	// 3Dモデル
 	Model* modelSkydome_ = nullptr;
+
+	// マップチップフィールド
+	MapChipField* mapChipField_ = nullptr;
 };
