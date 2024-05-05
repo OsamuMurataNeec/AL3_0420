@@ -43,7 +43,9 @@ void GameScene::Initialize() {
 	// 自キャラの生成
 	player_ = new Player();
 	// 自キャラの初期化
-	player_->Initialize(model_, textureHandle_, &viewProjection_);
+	// 座標をマップチップ番号で指定
+	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(1,18);
+	player_->Initialize(model_, &viewProjection_, playerPosition);
 
 	// 天球の生成
 	skydome_ = new Skydome();
@@ -165,7 +167,7 @@ void GameScene::Draw() {
 	// 3Dモデル描画
 //	model_->Draw(worldTransform_, viewProjection_, textureHandle_);
 	// 自キャラの描画
-//	player_->Draw();
+	player_->Draw();
 
 	// 天球の描画
 	skydome_->Draw();
