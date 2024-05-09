@@ -62,6 +62,15 @@ void GameScene::Initialize() {
 	mapChipField_->LoadMapChipCsv("Resources/map.csv");
 
 	GenerateBlocks();
+
+	cameraController_ = new CameraController();
+	cameraController_->Initialize();
+	cameraController_->SetTarget(player_);
+	cameraController_->Reset();
+
+	// カメラ移動範囲
+	CameraController::Rect area = {0, 100, 0, 100};
+	cameraController_->SetMovableArea(area);
 }
 
 void GameScene::GenerateBlocks() {
@@ -135,6 +144,12 @@ void GameScene::Update() {
 			worldTransformBlockYoko->TransferMatrix();
 		}
 	}
+
+	cameraController_ ->Update();
+	viewProjection_.matView = cameraController_->GetViewProjection().matView;
+	viewProjection_.matProjection = cameraController_->GetViewProjection().matProjection;
+	// ビュープロジェクション行列の転送
+	viewProjection_.TransferMatrix();
 }
 
 

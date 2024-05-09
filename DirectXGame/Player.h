@@ -6,13 +6,13 @@
 /// 自キャラ
 /// </summary>
 class Player {
-public:
 	// 左右
 	enum class LRDirection {
 		kRight,
 		kLeft,
 	};
 
+public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
@@ -28,6 +28,8 @@ public:
 	/// 描画
 	/// </summary>
 	void Draw();
+
+	WorldTransform& GetWorldTransform() { return worldTransform_; }
 
 private:
 	// ワールド変換データ
