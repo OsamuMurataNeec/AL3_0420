@@ -69,7 +69,7 @@ void GameScene::Initialize() {
 	cameraController_->Reset();
 
 	// カメラ移動範囲
-	CameraController::Rect area = {0, 100, 0, 100};
+	CameraController::Rect area = {12.0f, 100 - 12.0f, 6.0f, 6.0f};
 	cameraController_->SetMovableArea(area);
 }
 
@@ -119,8 +119,10 @@ void GameScene::Update() {
 		// ビュープロジェクション行列の転送
 		viewProjection_.TransferMatrix();
 	} else {
-		// ビュープロジェクション行列の更新と転送
-		viewProjection_.UpdateMatrix();
+		viewProjection_.matView = cameraController_->GetViewProjection().matView;
+		viewProjection_.matProjection = cameraController_->GetViewProjection().matProjection;
+		// ビュープロジェクション行列の転送
+		viewProjection_.TransferMatrix();
 	}
 
 	// 自キャラの更新
@@ -146,10 +148,6 @@ void GameScene::Update() {
 	}
 
 	cameraController_ ->Update();
-	viewProjection_.matView = cameraController_->GetViewProjection().matView;
-	viewProjection_.matProjection = cameraController_->GetViewProjection().matProjection;
-	// ビュープロジェクション行列の転送
-	viewProjection_.TransferMatrix();
 }
 
 
