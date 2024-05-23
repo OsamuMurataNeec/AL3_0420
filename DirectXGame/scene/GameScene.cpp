@@ -107,12 +107,6 @@ void GameScene::Update() {
 
 			// アフィン変換行列の作成
 			worldTransformBlockYoko->UpdateMatrix();
-			//(MakeAffineMatrix：自分で作った数学系関数)
-//			worldTransformBlockYoko->matWorld_ = 
-//				MakeAffineMatrix(worldTransformBlockYoko->scale_, worldTransformBlockYoko->rotation_, worldTransformBlockYoko->translation_);
-
-			// 定数バッファに転送
-			worldTransformBlockYoko->TransferMatrix();
 		}
 	}
 }
