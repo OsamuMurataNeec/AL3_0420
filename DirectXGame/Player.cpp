@@ -2,6 +2,7 @@
 #include "Player.h"
 #include "Input.h"
 #include "DirectxCommon.h"
+#include "Easing.h"
 #include <cassert>
 #include <numbers>
 #include <algorithm>
@@ -19,8 +20,9 @@ void Player::Initialize(Model* model, ViewProjection* viewProjection, const Vect
 
 
 	// 引数の内容をメンバ変数に記録
-	model_ = model;
-//	textureHandle_ = textureHandle;
+//	model_ = model;
+	model_ = Model::CreateFromOBJ("Player02_03", true); //	textureHandle_ = textureHandle;
+
 	viewProjection_ = viewProjection;
 }
 
@@ -48,7 +50,7 @@ void Player::Update(){
 					// 旋回開始時の角度
 					turnFirstRotationY_ = worldTransform_.rotation_.y;
 					// 旋回タイマー
-					turnTimer_ = kTimeTurn;
+					turnTimer_ = 0.7f;
 				}
 			} else if (Input::GetInstance()->PushKey(DIK_LEFT)) {
 				// 右移動中の左入力
@@ -64,7 +66,7 @@ void Player::Update(){
 					// 旋回開始時の角度
 					turnFirstRotationY_ = worldTransform_.rotation_.y;
 					// 旋回タイマー
-					turnTimer_ = kTimeTurn;
+					turnTimer_ = 0.7f;
 				}
 			}
 			// 加速/減速
@@ -74,6 +76,22 @@ void Player::Update(){
 
 			// 最大速度制限
 			velocity_.x = std::clamp(velocity_.x, -kLimitRunSpeed, kLimitRunSpeed);
+
+			if (acceleration.x >= 0.01f || acceleration.x <= -0.01f) {
+				acceleration.x = 0;
+			}
+
+			if (turnTimer_ > 0.0f) {
+				// タイマーのカウントダウン
+				turnTimer_ -= 1.0f / 60.0f;
+
+				// 左右の自キャラ角度テーブル
+				float destinationRotationYTable[] = {std::numbers::pi_v<float> / 2.0f, std::numbers::pi_v<float> * 3.0f / 2.0f};
+				// 状態に応じた角度を取得する
+				float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
+				// 自キャラの角度を設定する
+				worldTransform_.rotation_.y = Easing::Liner(destinationRotationY, turnFirstRotationY_, Easing::EaseInOut(turnTimer_));
+			}
 
 		} else {
 			// 非入力時は移動減衰をかける
