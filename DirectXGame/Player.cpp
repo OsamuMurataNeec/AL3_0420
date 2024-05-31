@@ -7,23 +7,20 @@
 #include <numbers>
 #include <algorithm>
 
-void Player::Initialize(Model* model, ViewProjection* viewProjection, const Vector3& position){
+void Player::Initialize(const Vector3& position, ViewProjection *viewProjection) {
 	
-	// NULLチェック
-	assert(model);
-
 	// ワールド変換の初期化
 	worldTransform_.Initialize();
 	worldTransform_.translation_ = position;
+
+    viewProjection_ = viewProjection;
+
 	//右を向かせる(πとか数値情報が定義されてる)
 	worldTransform_.rotation_.y = std::numbers::pi_v<float> / 2.0f;
 
-
 	// 引数の内容をメンバ変数に記録
-//	model_ = model;
 	model_ = Model::CreateFromOBJ("Player02_03", true); //	textureHandle_ = textureHandle;
 
-	viewProjection_ = viewProjection;
 }
 
 void Player::Update(){
@@ -114,27 +111,24 @@ void Player::Update(){
 		velocity_.z += 0;
 		// 落下速度制限
 		velocity_.y = std::max(velocity_.y, -kLimitFallSpeed);
+
+		// 着地フラグ
+		landing = false;
+
+		// 地面との当たり判定
+		// 下降中？
+		if (velocity_.y < 0) {
+			// Y座標が地面以下になったら着地
+			if (worldTransform_.translation_.y <= 2.0f) {
+				landing = true;
+			}
+		}
 	}
-
 	
-		// 左右の自キャラ角度テーブル
-		float destinationRotationYTable[] = {std::numbers::pi_v<float> / 2.0f, std::numbers::pi_v<float> * 3.0f / 2.0f};
-		// 状態に応じた角度を取得する
-		float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
-		// 自キャラの角度を設定する
-		worldTransform_.rotation_.y = destinationRotationY;
-	
-	// 着地フラグ
-    bool landing = false;
-
-    // 地面との当たり判定
-    // 下降中？
-    if (velocity_.y < 0) {
-	    // Y座標が地面以下になったら着地
-	    if (worldTransform_.translation_.y <= 2.0f) {
-		    landing = true;
-	    }
-    }
+	// 移動
+	worldTransform_.translation_.x += velocity_.x;
+	worldTransform_.translation_.y += velocity_.y;
+	worldTransform_.translation_.z += velocity_.z;
 
 	// 接地判定
 	if (onGround_) {
@@ -157,10 +151,6 @@ void Player::Update(){
 		}
 	}
 	 
-	// 移動
-	worldTransform_.translation_.x += velocity_.x;
-	worldTransform_.translation_.y += velocity_.y;
-	worldTransform_.translation_.z += velocity_.z;
 
 	// 行列計算
 	worldTransform_.UpdateMatrix();
@@ -171,5 +161,5 @@ void Player::Update(){
 void Player::Draw(){
 
 	// 3Dモデルを描画
-	model_->Draw(worldTransform_, *viewProjection_, textureHandle_);
+	model_->Draw(worldTransform_, *viewProjection_);
 }

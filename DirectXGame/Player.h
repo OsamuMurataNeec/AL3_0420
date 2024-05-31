@@ -17,7 +17,7 @@ public:
 	/// 初期化
 	/// </summary>
 //	void Initialize(Model* model, uint32_t textureHandle, ViewProjection* viewProjection);
-	void Initialize(Model* model, ViewProjection* viewProjection, const Vector3& position);
+	void Initialize(const Vector3& position, ViewProjection *viewProjection);
 
 	/// <summary>
 	/// 更新
@@ -57,6 +57,8 @@ private:
 
 	// 接地状態フラグ
 	bool onGround_ = true;
+	// 着地フラグ
+	bool landing = false;
 
 	// 重力加速度（下方向）
 	static inline const float kGravityAcceleration = 0.05f;
