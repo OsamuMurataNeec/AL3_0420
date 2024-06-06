@@ -1,6 +1,7 @@
 #include "GameScene.h"
 #include "TextureManager.h"
 #include "myMath.h"
+#include "CameraController.h"
 #include <cassert>
 
 GameScene::GameScene() {}
@@ -22,6 +23,8 @@ GameScene::~GameScene() {
 
 	// マップチップフィールドの解放
 	delete mapChipField_;
+
+	delete cameraController;
 }
 
 void GameScene::Initialize() {
@@ -62,6 +65,14 @@ void GameScene::Initialize() {
 	mapChipField_->LoadMapChipCsv("Resources/map.csv");
 
 	GenerateBlocks();
+
+	cameraController = new CameraController;
+	cameraController->Initialize();
+	cameraController->SetTarget(player_);
+	cameraController->Reset();
+
+	CameraController::Rect cameraArea = {12.0f, 100 - 12.0f, 6.0f, 6.0f};
+	cameraController->SetMovableArea(cameraArea);
 }
 
 void GameScene::GenerateBlocks() {
@@ -101,6 +112,8 @@ void GameScene::Update() {
 	}
 #endif
 
+	cameraController->Update();
+
 	// カメラ処理
 	if (isDebugCameraActive_) {
 		// デバッグカメラの更新
@@ -111,7 +124,11 @@ void GameScene::Update() {
 		viewProjection_.TransferMatrix();
 	} else {
 		// ビュープロジェクション行列の更新と転送
-		viewProjection_.UpdateMatrix();
+//		viewProjection_.UpdateMatrix();
+		viewProjection_.matView = cameraController->GetViewProjection().matView;
+		viewProjection_.matProjection = cameraController->GetViewProjection().matProjection;
+		// ビュープロジェクションの転送
+		viewProjection_.TransferMatrix();
 	}
 
 	// 自キャラの更新
@@ -135,6 +152,8 @@ void GameScene::Update() {
 			worldTransformBlockYoko->TransferMatrix();
 		}
 	}
+
+	
 }
 
 

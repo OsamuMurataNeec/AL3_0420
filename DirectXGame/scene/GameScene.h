@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "Audio.h"
 #include "DirectXCommon.h"
 #include "Input.h"
@@ -11,7 +13,7 @@
 #include "DebugCamera.h"
 #include "Skydome.h"
 #include "MapChipField.h"
-#include <vector>
+#include "CameraController.h"
 
 
 /// <summary>
@@ -83,4 +85,6 @@ private: // メンバ変数
 
 	// マップチップフィールド
 	MapChipField* mapChipField_ = nullptr;
+
+	CameraController* cameraController = nullptr;
 };

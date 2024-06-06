@@ -2,6 +2,7 @@
 #include "Player.h"
 #include "Input.h"
 #include "DirectxCommon.h"
+#include "myMath.h"
 #include "Easing.h"
 #include <cassert>
 #include <numbers>
@@ -97,18 +98,18 @@ void Player::Update(){
 
 		 if (Input::GetInstance()->PushKey(DIK_UP)) {
 			// ジャンプ初速
-//			velocity_ += Vector3(0, kJumpAcceleration, 0);
-			velocity_.x += 0;
-			velocity_.y += kJumpAcceleration;
-			velocity_.z += 0;
+			velocity_ += Vector3(0, kJumpAcceleration, 0);
+//			velocity_.x += 0;
+//			velocity_.y += kJumpAcceleration;
+//			velocity_.z += 0;
 		 }
 
 	} else {
 		// 落下速度
-//		velocity_ += Vector3(0, -kGravityAcceleration, 0);
-		velocity_.x += 0;
-		velocity_.y += -kGravityAcceleration;
-		velocity_.z += 0;
+		velocity_ += Vector3(0, -kGravityAcceleration, 0);
+//		velocity_.x += 0;
+//		velocity_.y += -kGravityAcceleration;
+//		velocity_.z += 0;
 		// 落下速度制限
 		velocity_.y = std::max(velocity_.y, -kLimitFallSpeed);
 
@@ -126,9 +127,9 @@ void Player::Update(){
 	}
 	
 	// 移動
-	worldTransform_.translation_.x += velocity_.x;
-	worldTransform_.translation_.y += velocity_.y;
-	worldTransform_.translation_.z += velocity_.z;
+	worldTransform_.translation_ += velocity_;
+//	worldTransform_.translation_.y += velocity_.y;
+//	worldTransform_.translation_.z += velocity_.z;
 
 	// 接地判定
 	if (onGround_) {
