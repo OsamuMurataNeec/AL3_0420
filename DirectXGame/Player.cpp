@@ -7,6 +7,7 @@
 #include <cassert>
 #include <numbers>
 #include <algorithm>
+#include "MapChipField.h"
 
 void Player::Initialize(const Vector3& position, ViewProjection *viewProjection) {
 	
@@ -25,6 +26,96 @@ void Player::Initialize(const Vector3& position, ViewProjection *viewProjection)
 }
 
 void Player::Update(){
+
+	InputMove();
+	 
+	// 衝突情報を初期化
+	CollisionMapInfo collisionMapInfo;
+	// 移動量に速度の値をコピー
+	collisionMapInfo.move = velocity_;
+	// マップ衝突チェック
+	CheckMapCollision(collisionMapInfo);
+
+	// 行列計算
+	worldTransform_.UpdateMatrix();
+	// 行列を定数バッファに転送
+	worldTransform_.TransferMatrix();
+}
+
+void Player::CheckMapCollision(CollisionMapInfo &info) {
+
+	CheckMapCollisionUp(info);
+	/*
+	CheckMapCollisionDown(info);
+	CheckMapCollisionRight(info);
+	CheckMapCollisionLeft(info);
+	*/
+}
+
+void Player::CheckMapCollisionUp(CollisionMapInfo& info) { 
+	
+	// 上昇あり？
+	if (info.move.y <= 0) {
+		return;
+	}
+
+	// 移動後の4つの角の座標
+	std::array < Vector3, kNumCorner> positionsNew;
+
+	for (uint32_t i = 0; i < positionsNew.size(); ++i) {
+		positionsNew[i] = CornerPosition(worldTransform_.translation_ + info.move, static_cast<Corner>(i));
+	}
+
+	MapChipType mapChipType;
+	// 真上の当たり判定を行う
+	bool hit = false;
+	// 左上点の判定
+	MapChipField::IndexSet indexSet;
+
+	indexSet =
+		mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kLeftTop]);
+
+	mapChipType =
+		mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
+
+	if (mapChipType == MapChipType::kBlock) {
+		hit = true;
+	}
+
+	// 右上点の判定
+	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kRightTop]);
+
+	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
+
+	if (mapChipType == MapChipType::kBlock) {
+		hit = true;
+	}
+}
+
+/*
+void Player::CheckMapCollisionDown(CollisionMapInfo& info) {
+
+
+void Player::CheckMapCollisionLeft(CollisionMapInfo& info) {
+}
+
+void Player::CheckMapCollisionRight(CollisionMapInfo& info) {
+}
+*/
+
+Vector3 Player::CornerPosition(const Vector3 &center, Corner corner) {
+
+	Vector3 offsetTable[kNumCorner] = {
+	    {+kWidth / 2.0f, -kHeight / 2.0f, 0}, // kRightBottom
+	    {-kWidth / 2.0f, -kHeight / 2.0f, 0}, // kLeftBottom
+	    {+kWidth / 2.0f, +kHeight / 2.0f, 0}, // kRightTop
+	    {-kWidth / 2.0f, +kHeight / 2.0f, 0}  // kLeftTop
+	};
+
+	return center + offsetTable[static_cast<uint32_t>(corner)];
+}
+
+void Player::InputMove() {
 
 	// 移動入力
 	if (onGround_) {
@@ -96,20 +187,20 @@ void Player::Update(){
 			velocity_.x *= (1.0f - kAttenuation);
 		}
 
-		 if (Input::GetInstance()->PushKey(DIK_UP)) {
+		if (Input::GetInstance()->PushKey(DIK_UP)) {
 			// ジャンプ初速
 			velocity_ += Vector3(0, kJumpAcceleration, 0);
-//			velocity_.x += 0;
-//			velocity_.y += kJumpAcceleration;
-//			velocity_.z += 0;
-		 }
+			//			velocity_.x += 0;
+			//			velocity_.y += kJumpAcceleration;
+			//			velocity_.z += 0;
+		}
 
 	} else {
 		// 落下速度
 		velocity_ += Vector3(0, -kGravityAcceleration, 0);
-//		velocity_.x += 0;
-//		velocity_.y += -kGravityAcceleration;
-//		velocity_.z += 0;
+		//		velocity_.x += 0;
+		//		velocity_.y += -kGravityAcceleration;
+		//		velocity_.z += 0;
 		// 落下速度制限
 		velocity_.y = std::max(velocity_.y, -kLimitFallSpeed);
 
@@ -125,11 +216,9 @@ void Player::Update(){
 			}
 		}
 	}
-	
+
 	// 移動
 	worldTransform_.translation_ += velocity_;
-//	worldTransform_.translation_.y += velocity_.y;
-//	worldTransform_.translation_.z += velocity_.z;
 
 	// 接地判定
 	if (onGround_) {
@@ -151,13 +240,8 @@ void Player::Update(){
 			onGround_ = true;
 		}
 	}
-	 
-
-	// 行列計算
-	worldTransform_.UpdateMatrix();
-	// 行列を定数バッファに転送
-	worldTransform_.TransferMatrix();
 }
+
 
 void Player::Draw(){
 

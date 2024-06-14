@@ -22,14 +22,27 @@ struct MapChipData {
 /// </summary>
 class MapChipField {
 public:
+	struct IndexSet {
+		uint32_t xIndex;
+		uint32_t yIndex;
+	};
+	struct Rect {
+		float left;
+		float right;
+		float bottom;
+		float top;
+	};
+
 	void ResetMapChipData();
 	void LoadMapChipCsv(const std::string& filePath);
 	MapChipType GetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex);
 	Vector3 GetMapChipPositionByIndex(uint32_t xIndex, uint32_t yIndex);
+	IndexSet GetMapChipIndexSetByPosition(const Vector3& position);
+
 	uint32_t GetNumBlockVirtical();
 	uint32_t GetNumBlockHorizontal();
 
-	private:
+private:
 	// 1ブロックのサイズ
 	static inline const float kBlockWidth = 2.0f;
 	static inline const float kBlockHeight = 2.0f;

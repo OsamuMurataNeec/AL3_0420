@@ -57,12 +57,13 @@ void GameScene::Initialize() {
 	// 天球の初期化
 	skydome_->Initialize(modelSkydome_,&viewProjection_);
 
-
 	// デバッグカメラの生成
 	debugCamera_ = new DebugCamera(1280,720);
 
 	mapChipField_ = new MapChipField;
-	mapChipField_->LoadMapChipCsv("Resources/map.csv");
+	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
+
+	player_->SetMapChipField(mapChipField_);
 
 	GenerateBlocks();
 
