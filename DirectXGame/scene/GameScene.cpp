@@ -37,7 +37,7 @@ void GameScene::Initialize() {
 	textureHandle_ = TextureManager::Load("block.jpg");
 	// 3Dモデルの生成
 	model_ = Model::Create();
-	modelBlock_ = Model::Create();
+	modelBlock_ = Model::CreateFromOBJ("block");
 	// ワールドトランスフォームの初期化
 	worldTransform_.Initialize();
 	// ビュープロジェクションの初期化

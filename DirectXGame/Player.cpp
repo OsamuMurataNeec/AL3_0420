@@ -4,10 +4,11 @@
 #include "DirectxCommon.h"
 #include "myMath.h"
 #include "Easing.h"
+#include <algorithm>
 #include <cassert>
 #include <numbers>
-#include <algorithm>
 #include "MapChipField.h"
+
 
 void Player::Initialize(const Vector3& position, ViewProjection *viewProjection) {
 	
@@ -35,6 +36,23 @@ void Player::Update(){
 	collisionMapInfo.move = velocity_;
 	// マップ衝突チェック
 	CheckMapCollision(collisionMapInfo);
+
+		// 移動
+	worldTransform_.translation_ += collisionMapInfo.move;
+
+	// 天井接触による落下開始
+	if (collisionMapInfo.ceiling) {
+		velocity_.y = 0;
+	}
+
+	// 壁接触による減速
+	if (collisionMapInfo.hitWall) {
+		velocity_.x *= (1.0f - kAttenuationWall);
+	}
+
+	// 接地判定
+//	UpdateOnGround(collisionMapInfo);
+
 
 	// 行列計算
 	worldTransform_.UpdateMatrix();
@@ -89,6 +107,20 @@ void Player::CheckMapCollisionUp(CollisionMapInfo& info) {
 
 	if (mapChipType == MapChipType::kBlock) {
 		hit = true;
+	}
+
+		// ブロックにヒット？
+	if (hit) {
+		// めり込みを排除する方向に移動量を設定する
+		indexSet = mapChipField_->GetMapChipIndexSetByPosition(worldTransform_.translation_ + Vector3(0, +kHeight / 2.0f, 0));
+
+		// めり込み先ブロックの範囲矩形
+		MapChipField::Rect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
+		
+		// 移動量Y＝上にいるブロックの下端－プレイヤーY座標－（プレイヤーの高さ/2+ブランク）
+		info.move.y = 
+			std::max(0.0f, rect.bottom - worldTransform_.translation_.y - (kHeight / 2.0f + kBlank));
+		info.ceiling = true;
 	}
 }
 
@@ -189,18 +221,13 @@ void Player::InputMove() {
 
 		if (Input::GetInstance()->PushKey(DIK_UP)) {
 			// ジャンプ初速
-			velocity_ += Vector3(0, kJumpAcceleration, 0);
-			//			velocity_.x += 0;
-			//			velocity_.y += kJumpAcceleration;
-			//			velocity_.z += 0;
+			velocity_ += Vector3(0, kJumpAcceleration / 60.0f, 0);
 		}
 
 	} else {
 		// 落下速度
-		velocity_ += Vector3(0, -kGravityAcceleration, 0);
-		//		velocity_.x += 0;
-		//		velocity_.y += -kGravityAcceleration;
-		//		velocity_.z += 0;
+		velocity_ += Vector3(0, -kGravityAcceleration/60.0f, 0);
+
 		// 落下速度制限
 		velocity_.y = std::max(velocity_.y, -kLimitFallSpeed);
 
@@ -211,7 +238,7 @@ void Player::InputMove() {
 		// 下降中？
 		if (velocity_.y < 0) {
 			// Y座標が地面以下になったら着地
-			if (worldTransform_.translation_.y <= 2.0f) {
+			if (worldTransform_.translation_.y <= 1.0f) {
 				landing = true;
 			}
 		}
@@ -231,7 +258,7 @@ void Player::InputMove() {
 		// 着地
 		if (landing) {
 			// めり込み排斥
-			worldTransform_.translation_.y = 2.0f;
+			worldTransform_.translation_.y = 1.0f;
 			// 摩擦で横方向速度が減衰する
 			velocity_.x *= (1.0f - kAttenuation);
 			// 下方向速度をリセット

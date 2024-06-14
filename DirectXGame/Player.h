@@ -84,11 +84,11 @@ private:
 	bool landing = false;
 
 	// 重力加速度（下方向）
-	static inline const float kGravityAcceleration = 0.05f;
+	static inline const float kGravityAcceleration = 0.98f;
 	// 最大落下速度（下方向）
-	static inline const float kLimitFallSpeed = 0.2f;
+	static inline const float kLimitFallSpeed = 0.5f;
 	// ジャンプ初速（上方向）
-	static inline const float kJumpAcceleration = 0.7f;
+	static inline const float kJumpAcceleration = 20.f;
 
 	// マップチップによるフィールド
 	MapChipField* mapChipField_ = nullptr;
@@ -96,6 +96,9 @@ private:
 	// キャラクターの当たり判定サイズ
 	static inline const float kWidth = 0.8f;
 	static inline const float kHeight = 0.8f;
+	static inline const float kBlank = 0.04f;
+	static inline const float kAttenuationWall = 0.2f;
+
 
 	void CheckMapCollision(CollisionMapInfo& info);
 	void CheckMapCollisionUp(CollisionMapInfo& info);
